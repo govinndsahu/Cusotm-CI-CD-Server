@@ -1,5 +1,7 @@
-import 'dotenv/config'
+import "dotenv/config";
 import express from "express";
+import crypto from "crypto";
+import { spawn } from "child_process";
 
 const app = express();
 
@@ -8,6 +10,7 @@ const PORT = 4000;
 app.use(express.json());
 
 app.post("/deploy", (req, res, next) => {
+  console.log("webhook started!");
   try {
     const GitHubSignature = req.headers["x-hub-signature-256"];
 
@@ -52,6 +55,7 @@ app.post("/deploy", (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  console.log(err);
   return res.json({
     err,
   });

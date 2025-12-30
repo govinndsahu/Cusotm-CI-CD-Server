@@ -1,0 +1,25 @@
+projects:
+  - name: "StorageApp-Backend"
+    branch: "main"
+    commands:
+      run: |
+        # Setup SSH key and known_hosts
+        # Add server host key so SSH does not ask for confirmation
+        ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+        ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+        set -e
+
+        cd "/home/ubuntu/StorageApp-Backend"
+        git pull
+        npm ci
+        pm2 reload storageApp
+        EOF
+
+  - name: "StorageApp-Frontend"
+    branch: "main"
+    commands:
+      test: "echo tested"
+      build: "echo built"
+      deploy: "echo deployed"
+      list: ls -a

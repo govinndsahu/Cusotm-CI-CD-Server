@@ -29,7 +29,9 @@ export const prepareBashFile = async (ref, repositoryName, res) => {
     });
   }
 
-  for (const key in repository.commands) {
-    await fs.appendFile("deploy.sh", `${repository.commands[key]}\n`);
-  }
+  await (async function () {
+    for (const key in repository.commands) {
+      await fs.appendFile("deploy.sh", `${repository.commands[key]}\n`);
+    }
+  })();
 };

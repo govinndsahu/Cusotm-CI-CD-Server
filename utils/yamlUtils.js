@@ -19,15 +19,13 @@ export const prepareBashFile = async (ref, repositoryName, res) => {
 
   const { projects } = await parsedYaml();
 
-  console.log(projects);
+  const bashFile = await fs.readFile("deploy.sh", "utf8");
 
-  await fs.writeFile("deploy.sh", "");
+  if (bashFile.length) await fs.writeFile("deploy.sh", "");
 
   const repository = projects.find(
     (project) => project.name === repositoryName
   );
-
-  console.log(repository?.branch);
 
   if (repository.branch !== branch) {
     return res.status(400).json({

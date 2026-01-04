@@ -19,10 +19,6 @@ export const prepareBashFile = async (ref, repositoryName, res) => {
 
   const { projects } = await parsedYaml();
 
-  const bashFile = await fs.readFile("deploy.sh", "utf8");
-
-  if (bashFile.length) await fs.writeFile("deploy.sh", "");
-
   const repository = projects.find(
     (project) => project.name === repositoryName
   );

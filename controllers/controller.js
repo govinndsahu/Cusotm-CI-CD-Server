@@ -16,8 +16,6 @@ export const serverController = async (req, res, next) => {
 
     let count = 0;
 
-    await fs.writeFile("./logs/logs.txt", "");
-
     bashChildProcess.stdout.on("data", async (data) => {
       if (count === 0) {
         process.stdout.write(data);
@@ -39,7 +37,7 @@ export const serverController = async (req, res, next) => {
           "Build and deployed succefull!",
           "http://localhost:4000/logs.txt"
         );
-        await fs.writeFile("deploy.sh", "");
+        await fs.rm("deploy.sh");
         console.log("Script executed successfully!");
         console.log(req.body.commits[0].committer.email);
       } else {
@@ -51,6 +49,7 @@ export const serverController = async (req, res, next) => {
           "http://localhost:4000/logs.txt"
         );
         await sendEmail(req.body);
+        await fs.rm("deploy.sh");
         console.log("Script execution failed!");
       }
     });
@@ -64,6 +63,7 @@ export const serverController = async (req, res, next) => {
         "http://localhost:4000/logs.txt"
       );
       await sendEmail(req.body.commits[0].committer.email);
+      await fs.rm("deploy.sh");
       console.log("Error in spawning the process!");
       console.log(err);
       await fs.writeFile("./logs/logs.txt", err.toString(), "utf8");

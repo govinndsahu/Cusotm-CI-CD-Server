@@ -2,7 +2,7 @@ import axios from "axios";
 
 /**
  * Sets the GitHub Commit Status
- * @param {string} repo - The full name (e.g., "govindsahugit/Cusotm-CI-CD-Server")
+ * @param {string} repo - The full name (e.g., "govinndsahu/Cusotm-CI-CD-Server")
  * @param {string} sha - The commit fingerprint from req.body.after
  * @param {string} state - 'pending', 'success', or 'failure'
  * @param {string} description - A short message for the user

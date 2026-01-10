@@ -1,25 +1,50 @@
 projects:
   - name: "StorageApp-Backend"
-    branch: "main"
-    commands:
-      run: |
-        # Setup SSH key and known_hosts
-        # Add server host key so SSH does not ask for confirmation
-        ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+    environments:
+      - branch: "main"
+        env_name: "PROD"
+        commands:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
 
-        ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
-        set -e
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+            set -e
 
-        cd "/home/ubuntu/StorageApp-Backend"
-        git pull
-        npm ci
-        pm2 reload storageApp
-        EOF
+            cd "/home/ubuntu/StorageApp-Backend"
+            git pull origin main
+            npm ci
+            pm2 reload storageApp
+            EOF
 
-  - name: "StorageApp-Frontend"
-    branch: "main"
-    commands:
-      test: "echo tested"
-      build: "echo built"
-      deploy: "echo deployed"
-      list: ls -a
+      - branch: "develop"
+        env_name: "TEST"
+        commands:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+            set -e
+
+            cd "/home/ubuntu/Test-Modes/StorageApp-Backend"
+            git pull origin develop
+            npm ci
+            pm2 reload storageApp-Test
+            EOF
+
+  - name: "StorageApp-Froent"
+    environments:
+      - branch: "main"
+        env_name: "PROD"
+        commands:
+          run: |
+            # commands
+
+      - branch: "develop"
+        env_name: "TEST"
+        commands:
+          run: |
+            # commands

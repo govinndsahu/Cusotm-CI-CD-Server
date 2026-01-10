@@ -10,7 +10,7 @@ export const serverController = async (req, res, next) => {
     const ref = req.body.ref;
     const repositoryName = req.body.repository.full_name;
 
-    await prepareBashFile(ref, req.body.repository.name, res, req.body.after);
+    await prepareBashFile(ref, req.body.repository.name, req.body.after);
 
     const bashChildProcess = spawn("bash", [`./${req.body.after}.sh`]);
 

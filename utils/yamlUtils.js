@@ -14,7 +14,7 @@ export const parsedYaml = async () => {
   return { projects };
 };
 
-export const prepareBashFile = async (ref, repositoryName, res, sha) => {
+export const prepareBashFile = async (ref, repositoryName, sha) => {
   const branch = ref.split("/").pop();
 
   const { projects } = await parsedYaml();
@@ -23,15 +23,14 @@ export const prepareBashFile = async (ref, repositoryName, res, sha) => {
     (project) => project.name === repositoryName
   );
 
-  if (repository.branch !== branch) {
-    return res.status(400).json({
-      error: `Server is setup for ${repository?.branch}, not for ${branch}`,
-    });
+  const environment = repository.environments.find(
+    (env) => env.branch === branch
+  );
+
+  if (!environment) {
+    throw new Error(`No environment configuration found for branch: ${branch}`);
   }
 
-  await (async function () {
-    for (const key in repository.commands) {
-      await fs.appendFile(`${sha}.sh`, `${repository.commands[key]}\n`);
-    }
-  })();
+  const fullScript = Object.values(environment.commands).join("\n") + "\n";
+  await fs.writeFile(`${sha}.sh`, fullScript, "utf8");
 };

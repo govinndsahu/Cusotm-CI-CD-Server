@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import fs from "fs/promises";
-import { deployChanges } from "../utils/yamlUtils.js";
+import { prepareScript } from "../utils/yamlUtils.js";
 import { setGithubStatus } from "../services/statusApis.js";
 import { sendEmail } from "../services/sendEmail.js";
 import { checkHealth, triggerRollback } from "../utils/utils.js";
@@ -10,7 +10,7 @@ export const serverController = async (req, res, next) => {
   try {
     const repositoryName = req.body.repository.full_name;
 
-    await deployChanges(req);
+    await prepareScript(req);
 
     const bashChildProcess = spawn("bash", [`./${req.body.after}.sh`]);
 

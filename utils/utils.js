@@ -1,5 +1,5 @@
 import axios from "axios";
-import { prepareBashFile } from "./yamlUtils.js";
+import { prepareRollbackScript } from "./yamlUtils.js";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 
@@ -8,7 +8,6 @@ export const checkHealth = async (url, retries = 5) => {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await axios.get(url);
-      console.log(response.status);
       if (response.status === 200) return true;
     } catch (err) {
       console.log(`Health check attempt ${i + 1} failed. Retrying...`);
@@ -20,12 +19,7 @@ export const checkHealth = async (url, retries = 5) => {
 };
 
 export const triggerRollback = async (req) => {
-  const prevSHA = req.body.before;
-
-  process.env.PREVIOUS_RELEASE = prevSHA;
-  console.log(process.env.PREVIOUS_RELEASE);
-
-  await prepareBashFile(req, prevSHA, "rollback.yml");
+  await prepareRollbackScript(req);
 
   const bashChildProcess = spawn("bash", [`./${req.body.before}.sh`]);
 

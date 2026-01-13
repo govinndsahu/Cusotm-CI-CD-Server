@@ -12,23 +12,23 @@ projects:
             ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
             set -e
 
-            cd "/home/ubuntu/apps/production-apps/storageApp/backend/releases"
+            ROOT_PATH=$"/home/ubuntu/apps/production-apps/storageApp/backend"
+
+            cd "$ROOT_PATH/releases"
 
             mkdir "${NEW_RELEASE}"
 
             cd "./${NEW_RELEASE}"
 
-            git clone -b main "${CLONE_URL}" .
+            git clone -b develop "${CLONE_URL}" .
 
-            sudo ln -sf /home/ubuntu/apps/production-apps/storageApp/backend/.env .env
+            sudo ln -sf "$ROOT_PATH/.env" .env
 
             npm ci 
 
-            # sudo rm -r /home/ubuntu/apps/production-apps/storageApp/backend/current
+            cd "$ROOT_PATH"
 
-            cd "/home/ubuntu/apps/production-apps/storageApp/backend"
-
-            sudo ln -sfn /home/ubuntu/apps/production-apps/storageApp/backend/releases/${NEW_RELEASE} current
+            sudo ln -sfn "$ROOT_PATH/releases/${NEW_RELEASE}" current
 
             pm2 reload ecosystem.config.js
             EOF
@@ -39,7 +39,9 @@ projects:
             ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
 
             ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+
             set -e
+
             cd /home/ubuntu/apps/production-apps/storageApp/backend
 
             # Find the folder name that contains the previous SHA
@@ -52,6 +54,20 @@ projects:
 
             # Reload to pick up the old code
             pm2 reload ecosystem.config.js
+            EOF
+        cleanup:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+
+            set -e
+
+            cd /home/ubuntu/apps/production-apps/storageApp/backend/releases
+
+            ls -1t | tail -n +3 | xargs -I {} rm -rf "{}"
             EOF
 
       - branch: "develop"
@@ -107,6 +123,24 @@ projects:
 
             # Reload to pick up the old code
             pm2 reload ecosystem.config.js
+            EOF
+        cleanup:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+
+            set -e
+
+            echo "cleaning disk..."
+
+            cd /home/ubuntu/apps/test-apps/storageApp/backend/releases
+
+            ls -1t | tail -n +3 | xargs -I {} rm -rf "{}"
+
+            echo "Execution completed thoroughly."
             EOF
 
   - name: "StorageApp-Frotend"

@@ -1,7 +1,8 @@
 import axios from "axios";
-import { prepareRollbackScript } from "./yamlUtils.js";
+import { prepareCleanupScript, prepareRollbackScript } from "./yamlUtils.js";
 import { spawn } from "child_process";
 import fs from "fs/promises";
+import { setGithubStatus } from "../services/statusApis.js";
 
 // Helper function to verify the app is healthy
 export const checkHealth = async (url, retries = 5) => {
@@ -19,9 +20,13 @@ export const checkHealth = async (url, retries = 5) => {
 };
 
 export const triggerRollback = async (req) => {
+  const repositoryName = req.body.repository.full_name;
+  const prevSha = req.body.before;
+  const sha = req.body.after;
+
   await prepareRollbackScript(req);
 
-  const bashChildProcess = spawn("bash", [`./${req.body.before}.sh`]);
+  const bashChildProcess = spawn("bash", [`./${prevSha}.sh`]);
 
   bashChildProcess.stdout.on("data", async (data) => {
     process.stdout.write(data);
@@ -30,7 +35,38 @@ export const triggerRollback = async (req) => {
 
   bashChildProcess.stderr.on("data", async (data) => {
     process.stderr.write(data);
-    await fs.writeFile("./logs/logs.txt", data.toString(), "utf8");
+    await fs.appendFile("./logs/logs.txt", data.toString(), "utf8");
+  });
+
+  bashChildProcess.on("close", async () => {
+    await setGithubStatus(
+      repositoryName,
+      sha,
+      "failure",
+      `Health check failed. Auto-rolled back to previous version. ⏪`,
+      "http://localhost:4000/logs.txt"
+    );
+    await fs.rm(`${prevSha}.sh`);
+  });
+};
+
+export const cleanupDisk = async (req) => {
+  await prepareCleanupScript(req);
+
+  const bashChildProcess = spawn("bash", [`./${req.body.after}.sh`]);
+
+  bashChildProcess.stdout.on("data", async (data) => {
+    process.stdout.write(data);
+    await fs.appendFile("./logs/logs.txt", data.toString(), "utf8");
+  });
+
+  bashChildProcess.stderr.on("data", async (data) => {
+    process.stderr.write(data);
+    await fs.appendFile("./logs/logs.txt", data.toString(), "utf8");
+  });
+
+  bashChildProcess.on("close", async () => {
+    await fs.rm(`${req.body.after}.sh`);
   });
 };
 

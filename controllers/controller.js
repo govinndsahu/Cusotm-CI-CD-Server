@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import { prepareScript } from "../utils/yamlUtils.js";
 import { setGithubStatus } from "../services/statusApis.js";
 import { sendEmail } from "../services/sendEmail.js";
-import { checkHealth, triggerRollback } from "../utils/utils.js";
+import { checkHealth, cleanupDisk, triggerRollback } from "../utils/utils.js";
 
 export const serverController = async (req, res, next) => {
   console.log("webhook started!");
@@ -38,19 +38,13 @@ export const serverController = async (req, res, next) => {
             "Build and deployed succefull!",
             "http://localhost:4000/logs.txt"
           );
-          await fs.rm(`${req.body.after}.sh`);
+
+          await cleanupDisk(req);
+
           console.log("Script executed successfully!");
         } else {
           console.log("🚨 App is unhealthy! Triggering automatic rollback...");
           await triggerRollback(req);
-          await setGithubStatus(
-            repositoryName,
-            req.body.after,
-            "failure",
-            `Health check failed. Auto-rolled back to previous version. ⏪`,
-            "http://localhost:4000/logs.txt"
-          );
-          await fs.rm(`${req.body.before}.sh`);
         }
       } else {
         await setGithubStatus(

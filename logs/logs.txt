@@ -1,5 +1,23 @@
-# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
-Rolling back to: 20260113-c01aac70a144878500510d2a73b7f22bcb205f54
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 191 packages, and audited 192 packages in 4s
+
+36 packages are looking for funding
+  run `npm fund` for details
+
+1 high severity vulnerability
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
 [PM2] Applying action reloadProcessId on app [storageApp-test](ids: [ 20, 21 ])
 [PM2] [storageApp-test](20) ✓
 [PM2] [storageApp-test](21) ✓
+# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+# 35.154.222.141:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+cleaning disk...
+Execution completed thoroughly.

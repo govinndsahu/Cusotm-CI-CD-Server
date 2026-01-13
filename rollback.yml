@@ -1,0 +1,40 @@
+projects:
+  - name: "StorageApp-Backend"
+    environments:
+      - branch: "main"
+        env_name: "PROD"
+        commands:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+            set -e
+            EOF
+
+      - branch: "develop"
+        env_name: "TEST"
+        commands:
+          run: |
+            # Setup SSH key and known_hosts
+            # Add server host key so SSH does not ask for confirmation
+            ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+            ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
+            set -e
+            cd /home/ubuntu/apps/test-apps/storageApp/backend
+
+            ls releases | grep "${PREVIOUS_RELEASE}"
+
+            # Find the folder name that contains the previous SHA
+            PREV_FOLDER=$(ls releases | grep "${PREVIOUS_RELEASE}")
+
+            echo "Rolling back to: $PREV_FOLDER"
+
+            # Atomic Swap
+            sudo ln -sfn "./releases/$PREV_FOLDER" current
+
+            # Reload to pick up the old code
+            pm2 reload ecosystem.config.js
+            EOF

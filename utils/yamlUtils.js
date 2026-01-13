@@ -1,25 +1,36 @@
 import fs from "fs/promises";
 import yaml from "js-yaml";
+import { getFormattedDate } from "./utils.js";
 
-export const parsedYaml = async () => {
-  let yamlContent = await fs.readFile("workspace.yml", "utf8");
+export const parsedYaml = async (yamlFile) => {
+  let yamlContent = await fs.readFile(yamlFile, "utf8");
 
   // Replace ${VARIABLE} with process.env.VARIABLE
   yamlContent = yamlContent.replace(/\${(\w+)}/g, (match, key) => {
     return process.env[key] || match;
   });
 
-  const { projects } = yaml.load(yamlContent);
+  const data = yaml.load(yamlContent);
 
-  return { projects };
+  return data;
 };
 
-export const prepareBashFile = async (ref, repositoryName, sha) => {
+export const deployChanges = async (req) => {
+  process.env.NEW_RELEASE = `${getFormattedDate()}-${req.body.after}`;
+  process.env.CLONE_URL = req.body.repository.clone_url;
+
+  await prepareBashFile(req, req.body.after, "workspace.yml");
+};
+
+export const prepareBashFile = async (req, sha, yaml) => {
+  const ref = req.body.ref;
   const branch = ref.split("/").pop();
 
-  const { projects } = await parsedYaml();
+  const repositoryName = req.body.repository.name;
 
-  const repository = projects.find(
+  const data = await parsedYaml(yaml);
+
+  const repository = data.projects.find(
     (project) => project.name === repositoryName
   );
 

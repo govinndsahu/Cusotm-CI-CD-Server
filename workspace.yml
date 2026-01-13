@@ -12,7 +12,8 @@ projects:
             ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
             set -e
 
-            cd "/home/ubuntu/StorageApp-Backend"
+            cd "/home/ubuntu/apps/production-apps/storageApp/backend/releases"
+            mkdir "${NEW_RELEASE}"
             git pull origin main
             npm ci
             pm2 reload storageApp
@@ -29,13 +30,30 @@ projects:
             ssh -i "${SSH_SECRET_KEY_PATH}" "${SSH_USER}"@"${SSH_HOST}" "bash" << 'EOF'
             set -e
 
-            cd "/home/ubuntu/Test-Modes/StorageApp-Backend"
-            git pull origin develop
-            npm ci
-            pm2 reload storageApp-Test
+            cd "/home/ubuntu/apps/test-apps/storageApp/backend/releases"
+
+            echo "${NEW_RELEASE}"
+
+            mkdir "${NEW_RELEASE}"
+
+            cd "./${NEW_RELEASE}"
+
+            git clone -b develop "${CLONE_URL}" .
+
+            sudo ln -sf /home/ubuntu/apps/test-apps/storageApp/backend/.env .env
+
+            npm ci 
+
+            # sudo rm -r /home/ubuntu/apps/test-apps/storageApp/backend/current
+
+            cd "/home/ubuntu/apps/test-apps/storageApp/backend"
+
+            sudo ln -sfn /home/ubuntu/apps/test-apps/storageApp/backend/releases/${NEW_RELEASE} current
+
+            pm2 reload ecosystem.config.js
             EOF
 
-  - name: "StorageApp-Froent"
+  - name: "StorageApp-Frotend"
     environments:
       - branch: "main"
         env_name: "PROD"

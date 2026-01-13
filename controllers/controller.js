@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import fs from "fs/promises";
-import { prepareScript } from "../utils/yamlUtils.js";
+import { prepareScript } from "../utils/utils.js";
 import { setGithubStatus } from "../services/statusApis.js";
 import { sendEmail } from "../services/sendEmail.js";
 import { checkHealth, cleanupDisk, triggerRollback } from "../utils/utils.js";
@@ -9,10 +9,11 @@ export const serverController = async (req, res, next) => {
   console.log("webhook started!");
   try {
     const repositoryName = req.body.repository.full_name;
+    const sha = req.body.after;
 
     await prepareScript(req);
 
-    const bashChildProcess = spawn("bash", [`./${req.body.after}.sh`]);
+    const bashChildProcess = spawn("bash", [`./${sha}.sh`]);
 
     bashChildProcess.stdout.on("data", async (data) => {
       process.stdout.write(data);
@@ -33,7 +34,7 @@ export const serverController = async (req, res, next) => {
         if (isHealthy) {
           await setGithubStatus(
             repositoryName,
-            req.body.after,
+            sha,
             "success",
             "Build and deployed succefull!",
             "http://localhost:4000/logs.txt"
@@ -49,13 +50,13 @@ export const serverController = async (req, res, next) => {
       } else {
         await setGithubStatus(
           repositoryName,
-          req.body.after,
+          sha,
           "failure",
           `Failed to run pipeline for commit ${req.body.commits[0].message}`,
           "http://localhost:4000/logs.txt"
         );
         await sendEmail(req.body);
-        await fs.rm(`${req.body.after}.sh`);
+        await fs.rm(`${sha}.sh`);
         console.log("Script execution failed!");
       }
     });
@@ -63,13 +64,13 @@ export const serverController = async (req, res, next) => {
     bashChildProcess.on("error", async (err) => {
       await setGithubStatus(
         repositoryName,
-        req.body.after,
+        sha,
         "failure",
         `Failure ${err.message}`,
         "http://localhost:4000/logs.txt"
       );
       await sendEmail(req.body);
-      await fs.rm(`${req.body.after}.sh`);
+      await fs.rm(`${sha}.sh`);
       console.log("Error in spawning the process!");
       console.log(err);
       await fs.writeFile("./logs/logs.txt", err.toString(), "utf8");

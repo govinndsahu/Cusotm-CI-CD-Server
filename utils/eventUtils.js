@@ -21,9 +21,7 @@ export const onCloseForStartingScript = async ({
   repositoryName,
 }) => {
   if (code === 0) {
-    const isHealthy = await checkHealth(
-      "https://test.api.govindsahu.me/health"
-    );
+    const isHealthy = await checkHealth(process.env.APP_URL);
 
     if (isHealthy) {
       await setGithubStatus(
@@ -31,7 +29,7 @@ export const onCloseForStartingScript = async ({
         sha,
         "success",
         "Build and deployed succefull!",
-        "http://localhost:4000/logs.txt"
+        `${process.env.SERVER_URL}/logs.txt`,
       );
 
       await cleanupDisk(req);
@@ -47,7 +45,7 @@ export const onCloseForStartingScript = async ({
       sha,
       "failure",
       `Failed to run pipeline for commit ${req.body.commits[0].message}`,
-      "http://localhost:4000/logs.txt"
+      `${process.env.SERVER_URL}/logs.txt`,
     );
     await sendEmail(req.body);
     await fs.rm(`${sha}.sh`);
@@ -61,7 +59,7 @@ export const onError = async ({ err, req, sha, repositoryName }) => {
     sha,
     "failure",
     `Failure ${err.message}`,
-    "http://localhost:4000/logs.txt"
+    `${process.env.SERVER_URL}/logs.txt`,
   );
   await sendEmail(req.body);
   await fs.rm(`${sha}.sh`);

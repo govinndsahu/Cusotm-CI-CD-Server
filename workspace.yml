@@ -135,16 +135,16 @@ projects:
             echo "Execution completed thoroughly."
             EOF
 
-  - name: "StorageApp-Frotend"
+  - name: "DgDine-Frontend"
     environments:
       - branch: "main"
         env_name: "PROD"
         commands:
           run: |
-            # commands
-
-      - branch: "develop"
-        env_name: "TEST"
-        commands:
+            echo "Deployment for DgDine-Frontend is not yet implemented."
+        rollback:
           run: |
-            # commands
+            echo "Rollback for DgDine-Frontend is not yet implemented."
+        cleanup:
+          run: |
+            echo "Cleanup for DgDine-Frontend is not yet implemented."

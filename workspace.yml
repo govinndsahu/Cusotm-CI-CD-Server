@@ -135,7 +135,7 @@ projects:
             echo "Execution completed thoroughly."
             EOF
 
-  - name: "DgDine-Frontend"
+  - name: "DgDine-Frontend" # must be the same as the git repository name
     environments:
       - branch: "main"
         env_name: "PROD"

@@ -1,3 +1,6 @@
-./84ab94480c2964a942e29798f6353104f54de792.sh: line 4: [object: command not found
 Deployment for DgDine-Frontend is not yet implemented.
-Cleanup for DgDine-Frontend is not yet implemented.
+Rollback for DgDine-Frontend is not yet implemented.
+Deployment for DgDine-Frontend is not yet implemented.
+Rollback for DgDine-Frontend is not yet implemented.
+Deployment for DgDine-Frontend is not yet implemented.
+Rollback for DgDine-Frontend is not yet implemented.

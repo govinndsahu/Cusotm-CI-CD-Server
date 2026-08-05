@@ -21,7 +21,13 @@ export const onCloseForStartingScript = async ({
   repositoryName,
 }) => {
   if (code === 0) {
-    const isHealthy = await checkHealth(process.env.APP_URL);
+    let isHealthy;
+
+    if (process.env.WILL_CHECK_HEALTH === "false") {
+      isHealthy = true;
+    } else if (process.env.WILL_CHECK_HEALTH === "true") {
+      isHealthy = await checkHealth(process.env.APP_URL);
+    }
 
     if (isHealthy) {
       await setGithubStatus(

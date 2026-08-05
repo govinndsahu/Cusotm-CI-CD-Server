@@ -39,9 +39,10 @@ export const triggerRollback = async (req) => {
         sha,
         "failure",
         `Health check failed. Auto-rolled back to previous version. ⏪`,
-        "http://localhost:4000/logs.txt"
+        `${process.env.SERVER_URL}/logs/logs.txt`
       );
       await fs.rm(`${prevSha}.sh`);
+      await fs.rm(`${sha}.sh`);
     },
     onError: async (err) => onError({ err, req, sha, repositoryName }),
   });
